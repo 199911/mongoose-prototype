@@ -1,0 +1,14 @@
+version: "2"
+services:
+
+  mongoose-prototype:
+    image: node:8.9.4
+    volumes:
+      - .:/app
+    depends_on:
+      - mongo
+    working_dir: /app
+    command: yarn app:run
+
+  mongo:
+    image: mongo

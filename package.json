@@ -5,6 +5,10 @@
   "repository": "https://github.com/199911/mongoose-prototype.git",
   "author": "KU Lok Sun <sundaykuloksun@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "docker-compose up --abort-on-container-exit",
+    "app:run": "node src/index.js"
+  },
   "dependencies": {
     "mongoose": "^5.0.11"
   }
