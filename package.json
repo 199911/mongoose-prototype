@@ -1,0 +1,11 @@
+{
+  "name": "mongoose-prototype",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/199911/mongoose-prototype.git",
+  "author": "KU Lok Sun <sundaykuloksun@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "mongoose": "^5.0.11"
+  }
+}
