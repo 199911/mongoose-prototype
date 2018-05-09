@@ -10,6 +10,6 @@
     "app:run": "node src/index.js"
   },
   "dependencies": {
-    "mongoose": "^5.0.11"
+    "mongoose": "^5.0.17"
   }
 }
