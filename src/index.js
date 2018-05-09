@@ -1,1 +1,4 @@
-console.log('Hello World!');
+const mongoose = require('mongoose');
+
+mongoose.set('debug', true);
+mongoose.connect('mongodb://mongo/test');
