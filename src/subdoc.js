@@ -3,7 +3,6 @@ const {Schema} = require('mongoose');
 const childSchema = new Schema({
   name: 'string'
 });
-
 const parentSchema = new Schema({
   // Array of subdocuments
   children: [childSchema],
@@ -12,11 +11,18 @@ const parentSchema = new Schema({
   child: childSchema
 });
 
-const Parent = mongoose.model('Parent', parentSchema);
-const parent = new Parent({ children: [{ name: 'Matt' }, { name: 'Sarah' }] })
-parent.children[0].name = 'Matthew';
+module.exports = {
+  async main() {
+    const Parent = mongoose.model('Parent', parentSchema);
+    const parent = new Parent({ children: [{ name: 'Matt' }, { name: 'Sarah' }] })
+    parent.children[0].name = 'Matthew';
 
-// `parent.children[0].save()` is a no-op, it triggers middleware but
-// does **not** actually save the subdocument. You need to save the parent
-// doc.
-parent.save();
+    // `parent.children[0].save()` is a no-op, it triggers middleware but
+    // does **not** actually save the subdocument. You need to save the parent
+    // doc.
+    await parent.save();
+    console.log(parent.toObject());
+    console.log('Object ID will be added into sub-document');
+  }
+}
+
