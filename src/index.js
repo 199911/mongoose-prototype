@@ -50,6 +50,33 @@ describe('populate()', () => {
     });
   });
 
+  context('when we create a new populated object author in story', () => {
+    beforeEach(async () => {
+      const story = await Story
+        .findOne({ title: 'Casino Royale' })
+        .populate('author')
+        .exec();
+      story.author = new Person({
+        name: 'Sunday',
+        age: 999
+      });
+      await story.save();
+    });
+
+    it('does not save populated object automatically', async () => {
+      const myStory = await Story
+        .findOne({ title: 'Casino Royale' })
+        .exec();
+      expect(myStory.author).to.be.not.null;
+
+      const myPopulatedStory = await Story
+        .findOne({ title: 'Casino Royale' })
+        .populate('author')
+        .exec();
+      expect(myPopulatedStory.author).to.be.null;
+    });
+  })
+
   afterEach(async () => {
     await Person.remove();
     await Story.remove();
