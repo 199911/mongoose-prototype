@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { person, story } = require('./schemas.js');
+const { person, story, parent } = require('./schemas.js');
 
 const initPersonModel = (conn) => {
   return conn.model('Person', person);
@@ -7,8 +7,12 @@ const initPersonModel = (conn) => {
 const initStoryModel = (conn) => {
   return conn.model('Story', story);
 }
+const initParentModel = (conn) => {
+  return conn.model('Parent', parent);
+}
 
 module.exports = {
   initPersonModel,
-  initStoryModel
+  initStoryModel,
+  initParentModel
 };
