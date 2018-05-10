@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start": "docker-compose up --abort-on-container-exit",
-    "app:run": "node src/index.js"
+    "app:run": "mocha --timeout 20000 src/index.js"
   },
   "dependencies": {
     "chai": "^4.1.2",

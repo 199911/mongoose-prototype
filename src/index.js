@@ -1,35 +1,45 @@
-const mongoose = require('mongoose');
+const { expect } = require('chai');
+
+const { connect } = require('./driver.js');
 const {
   initPersonModel,
   initStoryModel
 } = require('./models.js');
-const { main: subdoc } = require('./subdoc.js');
 
-const main = async () => {
-  let ret;
-  mongoose.set('debug', true);
-  mongoose.connect('mongodb://mongo/test');
+describe('populate()', () => {
+  let conn;
+  let Person, Story;
+  beforeEach(async () => {
+    conn = connect();
+    Person = initPersonModel(conn);
+    Story = initStoryModel(conn);
 
-  const Person = initPersonModel(mongoose);
-  const Story = initStoryModel(mongoose);
+    const author = new Person({
+      name: 'Ian Fleming',
+      age: 50
+    });
+    await author.save();
 
-  const author = new Person({
-    name: 'Ian Fleming',
-    age: 50
+    const story = new Story({
+      title: 'Casino Royale',
+      // assign the _id from the person
+      author: author._id
+    });
+    await story.save();
   });
 
-  await author.save();
-
-  const story = new Story({
-    title: 'Casino Royale',
-    // assign the _id from the person
-    author: author._id
+  it('should populate person in story.author', async () => {
+    const story = await Story
+      .findOne({ title: 'Casino Royale' })
+      .populate('author')
+      .exec();
+    expect(story.author.name).to.be.equal('Ian Fleming');
   });
 
-  await story.save();
+  afterEach(async () => {
+    await Person.remove();
+    await Story.remove();
+    conn.close();
+  })
 
-
-  mongoose.disconnect();
-}
-
-main();
+});
