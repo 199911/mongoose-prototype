@@ -43,10 +43,25 @@ describe('populate()', () => {
         .findOne({ title: 'Casino Royale' })
         .populate('author')
         .exec();
-      const originAuthorId = story.author._id;
+      const originAuthorId = story.author._id.toString();
       story.set({ author: {name: 'Sunday'} });
       // A new object is created here
-      expect(story.author._id).to.be.not.equal(originAuthorId);
+      expect(story.author._id.toString()).to.be.not.equal(originAuthorId);
+    });
+  });
+
+  context('when we call story.set("author.name", value)', () => {
+    it('will not update author object', async () => {
+      const story = await Story
+        .findOne({ title: 'Casino Royale' })
+        .populate('author')
+        .exec();
+      const originAuthorId = story.author._id.toString();
+      story.set('author.name', 'Sunday');
+
+      // Populated object will not be updated
+      expect(story.author._id.toString()).to.be.equal(originAuthorId);
+      expect(story.author.name).to.be.equal('Ian Fleming');
     });
   });
 
