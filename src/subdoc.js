@@ -51,6 +51,20 @@ describe('sub-documents', () => {
     expect(myParent.child.name).to.be.equal('Sunday');
   });
 
+  // We have to call parent.save() to update sub-document
+  it('will not update parent.child if call child.save()', async () => {
+    const child = parent.child;
+    child.set({name: 'Sunday'});
+    await child.save();
+
+    const myParent = await Parent
+      .findOne({ name: 'Mum' })
+      .exec();
+
+    expect(myParent.child._id.toString()).to.be.equal(originalChildId);
+    expect(myParent.child.name).to.be.equal('Matt');
+  });
+
   afterEach(async () => {
     await Parent.remove();
     conn.close();
