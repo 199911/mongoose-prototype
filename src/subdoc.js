@@ -23,7 +23,7 @@ describe('sub-documents', () => {
     originalChildId = parent.child._id.toString();
   });
 
-  // We can access sub document with path1.path2
+  // We can update sub document with path1.path2
   it('should update child with parent.set("child.name", value)', async () => {
     parent.set('child.name', 'Sunday');
     await parent.save();
@@ -34,6 +34,20 @@ describe('sub-documents', () => {
 
     // No new child is created
     expect(myParent.child._id.toString()).to.be.equal(originalChildId);
+    expect(myParent.child.name).to.be.equal('Sunday');
+  });
+
+  // We can update sub document with path1.path2
+  it('should update child with parent.set({ child: {name: value} })', async () => {
+    parent.set({ child: {name: 'Sunday'} });
+    await parent.save();
+
+    const myParent = await Parent
+      .findOne({ name: 'Mum' })
+      .exec();
+
+    // New sub-document will be created, as we set an object to sub-document
+    expect(myParent.child._id.toString()).to.be.not.equal(originalChildId);
     expect(myParent.child.name).to.be.equal('Sunday');
   });
 
