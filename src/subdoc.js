@@ -1,28 +1,44 @@
-const mongoose = require('mongoose');
-const {Schema} = require('mongoose');
-const childSchema = new Schema({
-  name: 'string'
-});
-const parentSchema = new Schema({
-  // Array of subdocuments
-  children: [childSchema],
-  // Single nested subdocuments. Caveat: single nested subdocs only work
-  // in mongoose >= 4.2.0
-  child: childSchema
-});
+const { expect } = require('chai');
 
-module.exports = {
-  async main() {
-    const Parent = mongoose.model('Parent', parentSchema);
-    const parent = new Parent({ children: [{ name: 'Matt' }, { name: 'Sarah' }] })
-    parent.children[0].name = 'Matthew';
+const { connect } = require('./driver.js');
+const {
+  initParentModel
+} = require('./models.js');
 
-    // `parent.children[0].save()` is a no-op, it triggers middleware but
-    // does **not** actually save the subdocument. You need to save the parent
-    // doc.
+describe('sub-documents', () => {
+  let conn;
+  let Parent;
+  let parent;
+  let originalChildId;
+  beforeEach(async () => {
+    conn = connect();
+    Parent = initParentModel(conn);
+
+    parent = new Parent({
+      name: 'Mum',
+      children: [{ name: 'Matt' }, { name: 'Sarah' }],
+      child: { name: 'Matt'}
+    });
     await parent.save();
-    console.log(parent.toObject());
-    console.log('Object ID will be added into sub-document');
-  }
-}
+    originalChildId = parent.child._id.toString();
+  });
 
+  // We can access sub document with path1.path2
+  it('should update child with parent.set("child.name", value)', async () => {
+    parent.set('child.name', 'Sunday');
+    await parent.save();
+
+    const myParent = await Parent
+      .findOne({ name: 'Mum' })
+      .exec();
+
+    // No new child is created
+    expect(myParent.child._id.toString()).to.be.equal(originalChildId);
+    expect(myParent.child.name).to.be.equal('Sunday');
+  });
+
+  afterEach(async () => {
+    await Parent.remove();
+    conn.close();
+  })
+});

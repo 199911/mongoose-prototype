@@ -17,6 +17,7 @@ const child = new Schema({
 });
 
 const parent = new Schema({
+  name: String,
   // Array of subdocuments
   children: [child],
   // Single nested subdocuments. Caveat: single nested subdocs only work
