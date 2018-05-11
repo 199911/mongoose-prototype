@@ -79,6 +79,18 @@ describe('sub-documents', () => {
     expect(myParent.child.name).to.be.equal('Sunday');
   });
 
+  // We can update sub document in array with path1.index
+  it('should update child with parent.set("children.1.name", value)', async () => {
+    parent.set('children.1.name', 'Sunday');
+    await parent.save();
+
+    const myParent = await Parent
+      .findOne({ name: 'Mum' })
+      .exec();
+
+    expect(myParent.children[1].name).to.be.equal('Sunday');
+  });
+
   afterEach(async () => {
     await Parent.remove();
     conn.close();
