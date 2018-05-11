@@ -13,11 +13,13 @@ const story = new Schema({
 });
 
 const child = new Schema({
-  name: 'string'
+  name: 'string',
+  age: Number,
 });
 
 const parent = new Schema({
   name: String,
+  age: Number,
   // Array of subdocuments
   children: [child],
   // Single nested subdocuments. Caveat: single nested subdocs only work

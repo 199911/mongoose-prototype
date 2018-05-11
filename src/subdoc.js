@@ -16,8 +16,20 @@ describe('sub-documents', () => {
 
     parent = new Parent({
       name: 'Mum',
-      children: [{ name: 'Matt' }, { name: 'Sarah' }],
-      child: { name: 'Matt'}
+      children: [
+        {
+          name: 'Matt' ,
+          age: 22
+        },
+        {
+          name: 'Sarah',
+          age: 18
+        }
+      ],
+      child: {
+        name: 'Matt',
+        age: 22
+      }
     });
     await parent.save();
     originalChildId = parent.child._id.toString();
@@ -35,9 +47,10 @@ describe('sub-documents', () => {
     // No new child is created
     expect(myParent.child._id.toString()).to.be.equal(originalChildId);
     expect(myParent.child.name).to.be.equal('Sunday');
+    expect(myParent.child.age).to.be.equal(22);
   });
 
-  // We can update sub document with path1.path2
+  // We can update sub document with path1.path2, but the other field in child got removed
   it('should update child with parent.set({ child: {name: value} })', async () => {
     parent.set({ child: {name: 'Sunday'} });
     await parent.save();
@@ -49,6 +62,7 @@ describe('sub-documents', () => {
     // New sub-document will be created, as we set an object to sub-document
     expect(myParent.child._id.toString()).to.be.not.equal(originalChildId);
     expect(myParent.child.name).to.be.equal('Sunday');
+    expect(myParent.child.age).to.be.undefined;
   });
 
   // We have to call parent.save() to update sub-document
@@ -77,6 +91,7 @@ describe('sub-documents', () => {
 
     expect(myParent.child._id.toString()).to.be.equal(originalChildId);
     expect(myParent.child.name).to.be.equal('Sunday');
+    expect(myParent.child.age).to.be.equal(22);
   });
 
   // We can update sub document in array with path1.index
@@ -89,6 +104,7 @@ describe('sub-documents', () => {
       .exec();
 
     expect(myParent.children[1].name).to.be.equal('Sunday');
+    expect(myParent.children[1].age).to.be.equal(18);
   });
 
   afterEach(async () => {
