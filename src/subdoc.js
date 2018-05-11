@@ -65,6 +65,20 @@ describe('sub-documents', () => {
     expect(myParent.child.name).to.be.equal('Matt');
   });
 
+  // child.set will mark the field dirty, so parent.ave() will update the record
+  it('will update parent.child if call child.set() and parent.save()', async () => {
+    const child = parent.child;
+    child.set({name: 'Sunday'});
+    await parent.save();
+
+    const myParent = await Parent
+      .findOne({ name: 'Mum' })
+      .exec();
+
+    expect(myParent.child._id.toString()).to.be.equal(originalChildId);
+    expect(myParent.child.name).to.be.equal('Sunday');
+  });
+
   afterEach(async () => {
     await Parent.remove();
     conn.close();
