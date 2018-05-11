@@ -92,6 +92,27 @@ describe('populate()', () => {
     });
   })
 
+  it('should update person in story.author when we call author.save(), without story.save()', async () => {
+    const story = await Story
+      .findOne({ title: 'Casino Royale' })
+      .populate('author')
+      .exec();
+    const author = story.author;
+    author.set({
+      name: 'Sunday',
+      age: 999
+    });
+    await author.save();
+
+    const myPopulatedStory = await Story
+      .findOne({ title: 'Casino Royale' })
+      .populate('author')
+      .exec();
+
+    expect(author._id.toString()).to.be.equal(story.author._id.toString());
+    expect(author.name).to.be.equal('Sunday');
+  });
+
   afterEach(async () => {
     await Person.remove();
     await Story.remove();
