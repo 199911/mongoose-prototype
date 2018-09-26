@@ -59,4 +59,38 @@ describe('bulkWrite() with updateOne operation', () => {
     });
 
   });
+
+  context('when update partial item', () => {
+    beforeEach(async () => {
+      const i = new Item({
+        a: 1,
+        b: 2,
+        c: 3,
+      })
+      await i.save();
+    })
+
+    it('should update item and keep other fields unchanged', async () => {
+      const expect = { a:1, b:4 };
+      const before = await Item.findOne({a:1}).lean();
+      const results = await Item.bulkWrite([
+        {
+          updateOne: {
+            filter: { a: 1 },
+            update: {
+              b: 4,
+            }
+          }
+        }
+      ]);
+      const after = await Item.findOne({a:1}).lean();
+      assert.ownInclude(after, expect)
+      if (DEBUG) {
+        console.log(before);
+        console.log(after);
+        console.log(expect);
+      }
+    });
+  });
+
 });
