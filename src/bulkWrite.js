@@ -93,4 +93,29 @@ describe('bulkWrite() with updateOne operation', () => {
     });
   });
 
+  context('when item does not exists', () => {
+    it('should update item and keep other fields unchanged', async () => {
+      const expect = { a: 3, b:6 };
+      const before = await Item.findOne({a:3}).lean();
+      const results = await Item.bulkWrite([
+        {
+          updateOne: {
+            filter: { a: 3 },
+            update: {
+              b: 6,
+            },
+            upsert: true,
+          }
+        }
+      ]);
+      const after = await Item.findOne({a:3}).lean();
+      assert.ownInclude(after, expect)
+      if (DEBUG) {
+        console.log(before);
+        console.log(after);
+        console.log(expect);
+      }
+    });
+  });
+
 });
