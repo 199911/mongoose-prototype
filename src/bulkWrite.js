@@ -11,7 +11,7 @@ const item = new Schema({
   c: Number,
 });
 
-describe('bulkWrite() with updateOne operation', () => {
+describe('bulkWrite() with updateOne upsert operation', () => {
   let conn, Item;
 
   beforeEach(() => {
@@ -45,7 +45,8 @@ describe('bulkWrite() with updateOne operation', () => {
             update: {
               b: 4,
               c: 6,
-            }
+            },
+            upsert: true,
           }
         }
       ]);
@@ -79,7 +80,8 @@ describe('bulkWrite() with updateOne operation', () => {
             filter: { a: 1 },
             update: {
               b: 4,
-            }
+            },
+            upsert: true,
           }
         }
       ]);
