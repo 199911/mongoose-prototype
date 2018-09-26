@@ -9,6 +9,11 @@ const item = new Schema({
   a: Number,
   b: Number,
   c: Number,
+  doc: {
+    e: Number,
+    f: Number,
+    g: Number,
+  }
 });
 
 describe('bulkWrite() with updateOne upsert operation', () => {
@@ -133,15 +138,7 @@ describe('bulkWrite() with updateOne upsert operation', () => {
     it('should update item and keep other fields unchanged', async () => {
       const expect = { a: 3, b:6 };
       const before = await Item.findOne({a:3}).lean();
-      const {
-        insertedCount,
-        matchedCount,
-        modifiedCount,
-        deletedCount,
-        upsertedCount,
-        upsertedIds,
-        insertedIds,
-      } = await Item.bulkWrite([
+      const res = await Item.bulkWrite([
         {
           updateOne: {
             filter: { a: 3 },
@@ -152,6 +149,15 @@ describe('bulkWrite() with updateOne upsert operation', () => {
           }
         }
       ]);
+      const {
+        insertedCount,
+        matchedCount,
+        modifiedCount,
+        deletedCount,
+        upsertedCount,
+        upsertedIds,
+        insertedIds,
+      } = res;
       const after = await Item.findOne({a:3}).lean();
       if (DEBUG) {
         console.log({
@@ -168,6 +174,68 @@ describe('bulkWrite() with updateOne upsert operation', () => {
         console.log(expect);
       }
       assert.ownInclude(after, expect);
+    });
+  });
+
+  context('when update partial sub-document in item', () => {
+    beforeEach(async () => {
+      const i = new Item({
+        a: 999,
+        doc: {
+          e: 6,
+          f: 8,
+          g: 9,
+        }
+      })
+      await i.save();
+    })
+
+    it('should update sub-document and keep other fields unchanged', async () => {
+      const expect = {
+        a: 999,
+        doc: {
+          e: 6,
+          f: 6,
+          g: 6,
+        }
+      };
+      const before = await Item.findOne({a: 999}).lean();
+      const {
+        insertedCount,
+        matchedCount,
+        modifiedCount,
+        deletedCount,
+        upsertedCount,
+        upsertedIds,
+        insertedIds,
+      } = await Item.bulkWrite([
+        {
+          updateOne: {
+            filter: { a: 999 },
+            update: {
+              'doc.f': 6,
+              'doc.g': 6,
+            },
+            upsert: true,
+          }
+        }
+      ]);
+      const after = await Item.findOne({a: 999}).lean();
+      if (DEBUG) {
+        console.log({
+          insertedCount,
+          matchedCount,
+          modifiedCount,
+          deletedCount,
+          upsertedCount,
+          upsertedIds,
+          insertedIds,
+        });
+        console.log(before);
+        console.log(after);
+        console.log(expect);
+      }
+      assert.deepOwnInclude(after, expect);
     });
   });
 
