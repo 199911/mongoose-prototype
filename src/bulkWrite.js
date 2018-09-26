@@ -111,7 +111,6 @@ describe('bulkWrite() with updateOne upsert operation', () => {
         }
       ]);
       const after = await Item.findOne({a:1}).lean();
-      assert.ownInclude(after, expect)
       if (DEBUG) {
         console.log({
           insertedCount,
@@ -126,6 +125,7 @@ describe('bulkWrite() with updateOne upsert operation', () => {
         console.log(after);
         console.log(expect);
       }
+      assert.ownInclude(after, expect);
     });
   });
 
@@ -153,7 +153,6 @@ describe('bulkWrite() with updateOne upsert operation', () => {
         }
       ]);
       const after = await Item.findOne({a:3}).lean();
-      assert.ownInclude(after, expect)
       if (DEBUG) {
         console.log({
           insertedCount,
@@ -168,6 +167,7 @@ describe('bulkWrite() with updateOne upsert operation', () => {
         console.log(after);
         console.log(expect);
       }
+      assert.ownInclude(after, expect);
     });
   });
 
