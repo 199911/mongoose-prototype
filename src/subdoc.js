@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 
-const { connect } = require('./driver.js');
+const { connect } = require('./drivers/mongoose.js');
 const {
   initParentModel
 } = require('./models.js');

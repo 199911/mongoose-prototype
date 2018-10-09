@@ -1,7 +1,7 @@
 const { Schema } = require('mongoose');
 const { assert } = require('chai');
 
-const { connect } = require('./driver.js');
+const { connect } = require('./drivers/mongoose.js');
 
 DEBUG = true;
 
