@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const { connectAsync, disconnectAsync } = require('./drivers/mongoose.js');
+const { connectAsync, disconnectAsync, resetAsync } = require('./drivers/mongoose.js');
 
 let mongoMemoryServer;
 let mongoose;
@@ -17,16 +17,17 @@ after('Teardown Mock MongoDB', async () => {
   mongoMemoryServer.stop();
 });
 
-describe('Basic test', () => {
-  beforeEach('Setup mongoose', async () => {
-    const uri = await mongoMemoryServer.getConnectionString();
-    const name = 'jest';
-    mongoose = await connectAsync({ uri, name });
-  });
+beforeEach('Setup mongoose', async () => {
+  const uri = await mongoMemoryServer.getConnectionString();
+  const name = 'jest';
+  mongoose = await connectAsync({ uri, name });
+});
 
-  afterEach('Tear down mongoose', async () => {
-    await disconnectAsync(mongoose);
-  });
+afterEach('Tear down mongoose', async () => {
+  await disconnectAsync(mongoose);
+});
+
+describe('Basic test', () => {
 
   let Kitten;
   const fixture = { name: 'Silence' };
