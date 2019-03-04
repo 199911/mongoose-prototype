@@ -14,6 +14,7 @@
     "chai": "^4.1.2",
     "mocha": "^5.1.1",
     "mockgoose": "^7.3.5",
+    "mongodb": "^3.1.13",
     "mongodb-memory-server": "^3.1.2",
     "mongoose": "^5.0.17"
   }
