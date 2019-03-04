@@ -1,10 +1,11 @@
 const { assert } = require('chai');
 
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const { connectAsync, disconnectAsync, resetAsync } = require('./drivers/mongoose.js');
+const MongooseDriver = require('./drivers/MongooseDriver.js');
 
 let mongoMemoryServer;
 let mongoose;
+let mongooseDriver;
 
 before('Setup Mock MongoDB', async () => {
   mongoMemoryServer = new MongoMemoryServer({
@@ -20,11 +21,13 @@ after('Teardown Mock MongoDB', async () => {
 beforeEach('Setup mongoose', async () => {
   const uri = await mongoMemoryServer.getConnectionString();
   const name = 'jest';
-  mongoose = await connectAsync({ uri, name });
+  mongooseDriver = new MongooseDriver(uri, name);
+  mongoose = await mongooseDriver.connectAsync();
 });
 
 afterEach('Tear down mongoose', async () => {
-  await disconnectAsync(mongoose);
+  await mongooseDriver.resetAsync();
+  await mongooseDriver.disconnectAsync();
 });
 
 describe('Basic test', () => {
