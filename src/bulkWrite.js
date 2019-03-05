@@ -137,10 +137,6 @@ describe('bulkWrite()', () => {
       });
 
       it('should match and modify 1 document', async () => {
-        const expectedRet = {
-          matchedCount: 1,
-          modifiedCount: 1,
-        };
         assert.equal(ret.matchedCount, 1);
         assert.equal(ret.modifiedCount, 1);
         assert.ownInclude(ret.result, {
@@ -189,6 +185,16 @@ describe('bulkWrite()', () => {
         // whole field `item.doc` is updates, the object is replaced by { e:6, g:6 }
         assert.notExists(item.doc.f);
       });
+
+      it('should match and modify 1 document', async () => {
+        assert.equal(ret.matchedCount, 1);
+        assert.equal(ret.modifiedCount, 1);
+        assert.ownInclude(ret.result, {
+          ok: 1,
+          nMatched: 1,
+          nModified: 1,
+        });
+      });
     });
   });
 
@@ -196,9 +202,10 @@ describe('bulkWrite()', () => {
     context('when update some fields with updateOne upsert operation', () => {
       const filter = { a: 3 };
       const update = { a: 3, b: 6 };
+      let ret;
 
       beforeEach('Run query', async () => {
-        const res = await Item.bulkWrite([
+        ret = await Item.bulkWrite([
           {
             updateOne: {
               filter,
@@ -212,6 +219,19 @@ describe('bulkWrite()', () => {
       it('should create item', async () => {
         const item = await Item.findOne(filter).lean();
         assert.ownInclude(item, update);
+      });
+
+      it('should match and modify 1 document', async () => {
+        assert.equal(ret.upsertedCount, 1);
+        assert.ownInclude(ret.result, {
+          ok: 1,
+          nUpserted: 1,
+        });
+      });
+
+      it('should return upserted id', () => {
+        assert.equal(ret.result.upserted.length, 1);
+        assert.exists(ret.upsertedIds[0]);
       });
     });
   });
