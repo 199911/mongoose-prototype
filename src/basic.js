@@ -31,19 +31,18 @@ afterEach('Tear down mongoose', async () => {
 });
 
 describe('Basic test', () => {
-
   let Kitten;
   const fixture = { name: 'Silence' };
 
   beforeEach('Setup models', () => {
     const kittySchema = new mongoose.Schema({
-      name: String
+      name: String,
     });
     Kitten = mongoose.model('Kitten', kittySchema);
   });
 
   beforeEach('Setup kitten', async () => {
-    silence = await Kitten.create(fixture);
+    await Kitten.create(fixture);
   });
 
   it('should find a kitten name slience', async () => {
