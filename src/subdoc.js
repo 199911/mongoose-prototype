@@ -108,44 +108,51 @@ describe('sub-documents', () => {
   });
 
   // We have to call parent.save() to update sub-document
-  it.skip('will not update parent.child if call child.save()', async () => {
-    const { child } = parent;
-    child.set({ name: 'Sunday' });
-    await child.save();
+  context('when call child.save()', () => {
+    it('will not update parent.child', async () => {
+      const { child } = parent;
+      child.set({ name: 'Sunday' });
+      // Suppress warning on child.save does not update parent.child
+      await child.save({ suppressWarning: true });
 
-    const myParent = await Parent
-      .findOne({ name: 'Mum' })
-      .exec();
+      const myParent = await Parent
+        .findOne({ name: 'Mum' })
+        .exec();
 
-    assert(myParent.child._id.toString()).to.be.equal(childId);
-    assert(myParent.child.name).to.be.equal('Matt');
+      assert.equal(myParent.child._id.toString(), childId.toString());
+      assert.equal(myParent.child.name, 'Matt');
+    });
   });
 
-  // child.set will mark the field dirty, so parent.ave() will update the record
-  it.skip('will update parent.child if call child.set() and parent.save()', async () => {
-    const { child } = parent;
-    child.set({ name: 'Sunday' });
-    await parent.save();
+  // child.set will mark the field dirty, so parent.save() will update the record
+  context('when call child.set() and parent.save()', () => {
+    it('will update parent.child', async () => {
+      const { child } = parent;
+      child.set({ name: 'Sunday' });
+      await parent.save();
 
-    const myParent = await Parent
-      .findOne({ name: 'Mum' })
-      .exec();
+      const myParent = await Parent
+        .findOne({ name: 'Mum' })
+        .exec();
 
-    assert(myParent.child._id.toString()).to.be.equal(childId);
-    assert(myParent.child.name).to.be.equal('Sunday');
-    assert(myParent.child.age).to.be.equal(22);
+      assert.equal(myParent.child._id.toString(), childId.toString());
+      assert.equal(myParent.child.name, 'Sunday');
+      assert.equal(myParent.child.age, 22);
+    });
   });
 
   // We can update sub document in array with path1.index
-  it.skip('should update child with parent.set("children.1.name", value)', async () => {
-    parent.set('children.1.name', 'Sunday');
-    await parent.save();
+  context('when call parent.set("children.1.name", value)', () => {
+    it('should update child', async () => {
+      parent.set('children.1.name', 'Sunday');
+      await parent.save();
 
-    const myParent = await Parent
-      .findOne({ name: 'Mum' })
-      .exec();
+      const myParent = await Parent
+        .findOne({ name: 'Mum' })
+        .exec();
 
-    assert(myParent.children[1].name).to.be.equal('Sunday');
-    assert(myParent.children[1].age).to.be.equal(18);
+      assert.equal(myParent.children[1].name, 'Sunday');
+      assert.equal(myParent.children[1].age, 18);
+    });
   });
 });
