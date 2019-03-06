@@ -63,25 +63,58 @@ describe('populate()', () => {
     await story.save();
   });
 
-  it('should populate person in story.author', async () => {
-    const story = await Story
-      .findOne({ title: 'Casino Royale' })
-      .populate('author')
-      .exec();
-    assert.equal(story.author.name, 'Ian Fleming');
-  });
-
-  // Conclusion: don't try to update populated object by set() from host object;
-  context('when we update populated object author by story.set({ author: { ... } })', () => {
-    it('will create a new populated object', async () => {
-      const story = await Story
+  context('when populate author', () => {
+    let story;
+    beforeEach('Populate author', async () => {
+      story = await Story
         .findOne({ title: 'Casino Royale' })
         .populate('author')
         .exec();
-      const originAuthorId = story.author._id.toString();
-      story.set({ author: { name: 'Sunday' } });
-      // A new object is created here
-      assert.notEqual(story.author._id.toString(), originAuthorId);
+    });
+    it('should story.author should be an object with field "name"', async () => {
+      assert.equal(story.author.name, 'Ian Fleming');
+    });
+    // Conclusion: don't try to update populated object by set() from host object;
+    context('when we replace author object with story.set({ author: { ... } })', () => {
+      let originAuthorId;
+      const newAuthor = { name: 'Sunday' };
+
+      beforeEach('Replace author', () => {
+        originAuthorId = story.author._id.toString();
+        story.set({ author: newAuthor });
+      });
+
+      it('should create a new author object in memory', async () => {
+        // A new object is created here
+        assert.notEqual(story.author._id.toString(), originAuthorId);
+        assert.ownInclude(story.author.toObject(), newAuthor);
+      });
+
+      context('when story.author.save() is not called', () => {
+        it('should not create a new person in database', async () => {
+          const actual = await Person.findOne(newAuthor).lean().exec();
+          assert.isNull(actual);
+        });
+      });
+
+      context('when story.author.save() is called', () => {
+        beforeEach('Call story.author.save()', async () => {
+          await story.author.save();
+        });
+
+        it('should create a new person in database', async () => {
+          const actual = await Person.findOne(newAuthor).lean().exec();
+          assert.ownInclude(actual, newAuthor);
+        });
+
+        it('should not update story author in database', async () => {
+          const actual = await Story
+            .findOne({ title: 'Casino Royale' })
+            .populate('author')
+            .exec();
+          assert.notOwnInclude(actual, newAuthor);
+        });
+      });
     });
   });
 
@@ -139,7 +172,7 @@ describe('populate()', () => {
     });
     await author.save();
 
-    const myPopulatedStory = await Story
+    await Story
       .findOne({ title: 'Casino Royale' })
       .populate('author')
       .exec();
