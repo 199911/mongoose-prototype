@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const MongooseDriver = require('./drivers/MongooseDriver.js');
+const MongooseDriver = require('../drivers/MongooseDriver.js');
 
 let mongoMemoryServer;
 let mongoose;
