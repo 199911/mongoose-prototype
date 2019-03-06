@@ -2,7 +2,6 @@ const { Mongoose } = require('mongoose');
 const { MongoClient } = require('mongodb');
 
 class MongooseDriver {
-
   constructor(uri, name) {
     this.config = { uri, name };
   }
