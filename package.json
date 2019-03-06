@@ -6,10 +6,8 @@
   "author": "KU Lok Sun <sundaykuloksun@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "app:run": "mocha --timeout 20000 src/index.js",
     "lint": "eslint --fix .",
-    "start": "docker-compose up --abort-on-container-exit",
-    "test": "mocha --timeout 20000"
+    "start": "mocha --timeout 20000"
   },
   "dependencies": {
     "chai": "^4.1.2",
