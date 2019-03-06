@@ -1,29 +1,64 @@
-const { expect } = require('chai');
+const { assert } = require('chai');
 
-const { connect } = require('./drivers/mongoose.js');
-const {
-  initPersonModel,
-  initStoryModel
-} = require('./models.js');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const MongooseDriver = require('./drivers/MongooseDriver.js');
+
+let mongoMemoryServer;
+let mongoose;
+let mongooseDriver;
+
+before('Setup Mock MongoDB', async () => {
+  mongoMemoryServer = new MongoMemoryServer({
+    autoStart: false,
+  });
+  await mongoMemoryServer.start();
+});
+
+after('Teardown Mock MongoDB', async () => {
+  mongoMemoryServer.stop();
+});
+
+beforeEach('Setup mongoose', async () => {
+  const uri = await mongoMemoryServer.getConnectionString();
+  const name = 'jest';
+  mongooseDriver = new MongooseDriver(uri, name);
+  mongoose = await mongooseDriver.connectAsync();
+});
+
+afterEach('Tear down mongoose', async () => {
+  await mongooseDriver.resetAsync();
+  await mongooseDriver.disconnectAsync();
+});
 
 describe('populate()', () => {
-  let conn;
-  let Person, Story;
-  beforeEach(async () => {
-    conn = connect();
-    Person = initPersonModel(conn);
-    Story = initStoryModel(conn);
+  let Person;
+  let Story;
 
+  beforeEach('Setup model', async () => {
+    const personSchema = new mongoose.Schema({
+      name: String,
+      age: Number,
+      stories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Story' }],
+    });
+    const storySchema = new mongoose.Schema({
+      author: { type: mongoose.Schema.Types.ObjectId, ref: 'Person' },
+      title: String,
+      fans: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Person' }],
+    });
+    Person = mongoose.model('Person', personSchema);
+    Story = mongoose.model('Story', storySchema);
+  });
+
+  beforeEach('Setup document', async () => {
     const author = new Person({
       name: 'Ian Fleming',
-      age: 50
+      age: 50,
     });
     await author.save();
-
     const story = new Story({
       title: 'Casino Royale',
       // assign the _id from the person
-      author: author._id
+      author: author._id,
     });
     await story.save();
   });
@@ -33,7 +68,7 @@ describe('populate()', () => {
       .findOne({ title: 'Casino Royale' })
       .populate('author')
       .exec();
-    expect(story.author.name).to.be.equal('Ian Fleming');
+    assert.equal(story.author.name, 'Ian Fleming');
   });
 
   // Conclusion: don't try to update populated object by set() from host object;
@@ -44,9 +79,9 @@ describe('populate()', () => {
         .populate('author')
         .exec();
       const originAuthorId = story.author._id.toString();
-      story.set({ author: {name: 'Sunday'} });
+      story.set({ author: { name: 'Sunday' } });
       // A new object is created here
-      expect(story.author._id.toString()).to.be.not.equal(originAuthorId);
+      assert.notEqual(story.author._id.toString(), originAuthorId);
     });
   });
 
@@ -60,8 +95,8 @@ describe('populate()', () => {
       story.set('author.name', 'Sunday');
 
       // Populated object will not be updated
-      expect(story.author._id.toString()).to.be.equal(originAuthorId);
-      expect(story.author.name).to.be.equal('Ian Fleming');
+      assert.equal(story.author._id.toString(), originAuthorId);
+      assert.equal(story.author.name, 'Ian Fleming');
     });
   });
 
@@ -73,7 +108,7 @@ describe('populate()', () => {
         .exec();
       story.author = new Person({
         name: 'Sunday',
-        age: 999
+        age: 999,
       });
       await story.save();
     });
@@ -82,25 +117,25 @@ describe('populate()', () => {
       const myStory = await Story
         .findOne({ title: 'Casino Royale' })
         .exec();
-      expect(myStory.author).to.be.not.null;
+      assert.isNotNull(myStory.author);
 
       const myPopulatedStory = await Story
         .findOne({ title: 'Casino Royale' })
         .populate('author')
         .exec();
-      expect(myPopulatedStory.author).to.be.null;
+      assert.isNull(myPopulatedStory.author);
     });
-  })
+  });
 
   it('should update person in story.author when we call author.save(), without story.save()', async () => {
     const story = await Story
       .findOne({ title: 'Casino Royale' })
       .populate('author')
       .exec();
-    const author = story.author;
+    const { author } = story;
     author.set({
       name: 'Sunday',
-      age: 999
+      age: 999,
     });
     await author.save();
 
@@ -109,14 +144,7 @@ describe('populate()', () => {
       .populate('author')
       .exec();
 
-    expect(author._id.toString()).to.be.equal(story.author._id.toString());
-    expect(author.name).to.be.equal('Sunday');
+    assert.equal(author._id.toString(), story.author._id.toString());
+    assert.equal(author.name, 'Sunday');
   });
-
-  afterEach(async () => {
-    await Person.remove();
-    await Story.remove();
-    conn.close();
-  })
-
 });
