@@ -51,26 +51,26 @@ describe('Update test', () => {
   });
 
   context('when set name to undefined in update data', () => {
-    it('should set name to null in collection when use document.update()', async () => {
-      await kittenDoc.update({ name: undefined, age: 2 });
+    it('should set name to null in collection when use document.updateOne()', async () => {
+      await kittenDoc.updateOne({ name: undefined, age: 2 });
       const actual = await Kitten.findOne({});
       assert.equal(actual.name, null);
     });
     it('should set name to null in collection when use findOneAndUpdate()', async () => {
-      await Kitten.findOneAndUpdate({name: 'Silence'}, { name: undefined, age: 4 });
+      await Kitten.findOneAndUpdate({ name: 'Silence' }, { name: undefined, age: 4 });
       const actual = await Kitten.findOne({});
       assert.equal(actual.name, null);
     });
   });
 
   context('when name is not defined in update data', () => {
-    it('should not update name in collection when use document.update()', async () => {
-      await kittenDoc.update({ age: 2 });
+    it('should not update name in collection when use document.updateOne()', async () => {
+      await kittenDoc.updateOne({ age: 2 });
       const actual = await Kitten.findOne({});
       assert.equal(actual.name, 'Silence');
     });
     it('should not update name in collection when use findOneAndUpdate()', async () => {
-      await Kitten.findOneAndUpdate({name: 'Silence'}, { age: 4 });
+      await Kitten.findOneAndUpdate({ name: 'Silence' }, { age: 4 });
       const actual = await Kitten.findOne({});
       assert.equal(actual.name, 'Silence');
     });

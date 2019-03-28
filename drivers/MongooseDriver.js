@@ -15,6 +15,7 @@ class MongooseDriver {
         keepAlive: true,
         dbName: name,
         useNewUrlParser: true,
+        useFindAndModify: false,
       },
     );
     return this.mongoose;
